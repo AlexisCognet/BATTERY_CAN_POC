@@ -1,2 +1,2 @@
-# BMS_CAN_POC
-POC avec une communication simple entre deux cartes STM32.
+# BATTERY_CAN_POC
+Battery part of the CAN communication POC with BMS. 
