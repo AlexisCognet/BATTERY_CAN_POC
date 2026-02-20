@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/alexis.cognet/Documents/BMS_CAN_POC/build/Release/cmake_install.cmake",
+		"C:/Users/alexis.cognet/Documents/BMS_CAN_POC/build/Release/cmake/stm32cubemx/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
