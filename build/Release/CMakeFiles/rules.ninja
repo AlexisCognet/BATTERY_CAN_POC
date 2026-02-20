@@ -6,7 +6,7 @@
 # It is included in the main 'build.ninja'.
 
 # =============================================================================
-# Project: BMS_CAN_POC
+# Project: BATTERY_CAN_POC
 # Configurations: Release
 # =============================================================================
 # =============================================================================
@@ -14,7 +14,7 @@
 #############################################
 # Rule for compiling ASM files.
 
-rule ASM_COMPILER__BMS_CAN_POC_unscanned_Release
+rule ASM_COMPILER__BATTERY_CAN_POC_unscanned_Release
   depfile = $DEP_FILE
   deps = gcc
   command = ${LAUNCHER}${CODE_CHECK}C:\Users\alexis.cognet\AppData\Local\stm32cube\bundles\gnu-tools-for-stm32\14.3.1+st.2\bin\arm-none-eabi-gcc.exe $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
@@ -24,7 +24,7 @@ rule ASM_COMPILER__BMS_CAN_POC_unscanned_Release
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__BMS_CAN_POC_unscanned_Release
+rule C_COMPILER__BATTERY_CAN_POC_unscanned_Release
   depfile = $DEP_FILE
   deps = gcc
   command = ${LAUNCHER}${CODE_CHECK}C:\Users\alexis.cognet\AppData\Local\stm32cube\bundles\gnu-tools-for-stm32\14.3.1+st.2\bin\arm-none-eabi-gcc.exe $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
@@ -34,7 +34,7 @@ rule C_COMPILER__BMS_CAN_POC_unscanned_Release
 #############################################
 # Rule for linking C executable.
 
-rule C_EXECUTABLE_LINKER__BMS_CAN_POC_Release
+rule C_EXECUTABLE_LINKER__BATTERY_CAN_POC_Release
   command = C:\WINDOWS\system32\cmd.exe /C "$PRE_LINK && C:\Users\alexis.cognet\AppData\Local\stm32cube\bundles\gnu-tools-for-stm32\14.3.1+st.2\bin\arm-none-eabi-gcc.exe $FLAGS $LINK_FLAGS $in -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT
@@ -62,7 +62,7 @@ rule C_COMPILER__STM32_Drivers_unscanned_Release
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = C:\Users\alexis.cognet\AppData\Local\stm32cube\bundles\cmake\4.0.1+st.3\bin\cmake.exe --regenerate-during-build -SC:\Users\alexis.cognet\Documents\BMS_CAN_POC -BC:\Users\alexis.cognet\Documents\BMS_CAN_POC\build\Release
+  command = C:\Users\alexis.cognet\AppData\Local\stm32cube\bundles\cmake\4.0.1+st.3\bin\cmake.exe --regenerate-during-build -SC:\Users\alexis.cognet\Documents\BATTERY_CAN_POC -BC:\Users\alexis.cognet\Documents\BATTERY_CAN_POC\build\Release
   description = Re-running CMake...
   generator = 1
 

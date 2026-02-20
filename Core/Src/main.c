@@ -59,8 +59,6 @@ OSPI_HandleTypeDef hospi1;
 OSPI_HandleTypeDef hospi2;
 
 RTC_HandleTypeDef hrtc;
-RTC_TimeTypeDef sTime = {0};
-RTC_DateTypeDef sDate = {0};
 
 SPI_HandleTypeDef hspi2;
 
@@ -70,7 +68,8 @@ UART_HandleTypeDef huart1;
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
-
+RTC_TimeTypeDef sTime = {0};
+RTC_DateTypeDef sDate = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

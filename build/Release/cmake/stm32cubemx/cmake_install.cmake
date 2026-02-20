@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/alexis.cognet/Documents/BMS_CAN_POC/cmake/stm32cubemx
+# Install script for directory: C:/Users/alexis.cognet/Documents/BATTERY_CAN_POC/cmake/stm32cubemx
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,6 +40,6 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/alexis.cognet/Documents/BMS_CAN_POC/build/Release/cmake/stm32cubemx/install_local_manifest.txt"
+  file(WRITE "C:/Users/alexis.cognet/Documents/BATTERY_CAN_POC/build/Release/cmake/stm32cubemx/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
