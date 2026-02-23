@@ -16,10 +16,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-enum MESSAGE_TYPE {
-  ALERT_WARNING,
-  ALERT_CRITICAL,
-};
+enum MESSAGE_TYPE { BATTERY_STATUS };
 
 /**
  * @brief Send a CAN message over CAN Bus.
@@ -31,7 +28,7 @@ enum MESSAGE_TYPE {
  * @param type The type of message to be sent (see MESSAGE_TYPE enum).
  * @return true if message was successefuly sent, false otherwise.
  */
-bool SendMessage(uint8_t TxData[1], enum MESSAGE_TYPE type);
+bool SendCANMessage(uint8_t TxData[12], enum MESSAGE_TYPE type);
 
 /**
  * @brief Handle received CAN message.

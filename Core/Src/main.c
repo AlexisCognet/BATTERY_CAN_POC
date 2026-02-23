@@ -15,17 +15,21 @@
  *
  ******************************************************************************
  */
-/* USER CODE END Header */
-/* Includes ------------------------------------------------------------------*/
-#include "main.h"
+
+#include "can.h"
 #include "logger.h"
+#include "stm32u585xx.h"
 #include "stm32u5xx.h"
 #include "stm32u5xx_hal.h"
 #include "utils.h"
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -104,7 +108,6 @@ static void MX_RTC_Init(void);
 int main(void) {
 
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -143,26 +146,41 @@ int main(void) {
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
   // STart FDCAN1
-  if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK) {
-    sendUSART1Message("");
-    LOG(FAULT, "Can't start FDCAN\r\n");
+  HAL_StatusTypeDef status;
+  if ((status = HAL_FDCAN_Start(&hfdcan1)) != HAL_OK) {
+    LOG(FAULT, "Can't start FDCAN : HAL_status=%d.\r\n", status);
   }
-  if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,
-                                     0)) {
-    LOG(FAULT, "Can't activate notifications for FDCAN\r\n");
+  if ((status = HAL_FDCAN_ActivateNotification(
+           &hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0)) != HAL_OK) {
+    LOG(FAULT, "Can't activate notifications for FDCAN : HAL_status=%d.\r\n",
+        status);
   }
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  int count = 0;
+
+  LOG(INFO, "Hello I am the battery board !");
   while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    LOG(INFO, "Hello World ! #%d\r\n", count);
 
-    count++;
+    GPIO_PinState pinState;
+    if ((pinState = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) == GPIO_PIN_SET) {
+      LOG(INFO, "User button has been pressed let's send a CAN message !");
+      float temperature = 49.61f;
+      float voltage = 15.83f;
+      float intensity = 128.52f;
+      uint8_t TxData[12];
+      TxData[0] = temperature;
+      TxData[4] = intensity;
+      TxData[8] = voltage;
+
+      // SendCANMessage(TxData, BATTERY_STATUS);
+    }
+
+    HAL_Delay(200);
   }
   /* USER CODE END 3 */
 }
@@ -313,7 +331,7 @@ static void MX_FDCAN1_Init(void) {
   /* USER CODE END FDCAN1_Init 1 */
   hfdcan1.Instance = FDCAN1;
   hfdcan1.Init.ClockDivider = FDCAN_CLOCK_DIV1;
-  hfdcan1.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
+  hfdcan1.Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
   hfdcan1.Init.Mode = FDCAN_MODE_NORMAL;
   hfdcan1.Init.AutoRetransmission = DISABLE;
   hfdcan1.Init.TransmitPause = DISABLE;
@@ -865,7 +883,7 @@ static void MX_GPIO_Init(void) {
   /*Configure GPIO pin : USER_Button_Pin */
   GPIO_InitStruct.Pin = USER_Button_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(USER_Button_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED_RED_Pin LED_GREEN_Pin PH1 */
