@@ -15,6 +15,14 @@
 
 #define LOG_LEVEL_COUNT 4
 
+#define ANSI_RESET        "\033[0m"
+#define ANSI_CYAN         "\033[36m"
+#define ANSI_BOLD_RED     "\033[1;31m"
+#define ANSI_BOLD_YELLOW  "\033[1;33m"
+#define ANSI_BOLD_GREEN   "\033[1;32m"
+#define ANSI_BOLD_BLUE    "\033[1;34m"
+#define ANSI_WHITE        "\033[37m"
+
 enum LOG_LEVEL {
   /**
    * @brief Error wich do not make the system crash but some parts of it might

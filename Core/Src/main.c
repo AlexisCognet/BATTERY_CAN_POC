@@ -21,12 +21,15 @@
 #include "stm32u585xx.h"
 #include "stm32u5xx.h"
 #include "stm32u5xx_hal.h"
+#include "stm32u5xx_hal_fdcan.h"
 #include "utils.h"
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -99,6 +102,17 @@ static void MX_RTC_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+int _gettimeofday(struct timeval *tv, void *tzvp) {
+  // Use system tick count (e.g., HAL_GetTick() or SysTick)
+  uint32_t ticks = HAL_GetTick(); // or your system's uptime function
+  tv->tv_sec = ticks / 1000;
+  tv->tv_usec = (ticks % 1000) * 1000;
+  return 0; // Success
+}
+
+float random_float(float min, float max) {
+  return min + (float)rand() / RAND_MAX * (max - min);
+}
 /* USER CODE END 0 */
 
 /**
@@ -147,11 +161,27 @@ int main(void) {
   /* USER CODE BEGIN 2 */
   // STart FDCAN1
   HAL_StatusTypeDef status;
+
+  FDCAN_FilterTypeDef sFilterConfig;
+  sFilterConfig.IdType = FDCAN_STANDARD_ID;
+  sFilterConfig.FilterIndex = 0;
+  sFilterConfig.FilterType = FDCAN_FILTER_DUAL;
+  sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  sFilterConfig.FilterID1 = 0x50;
+  sFilterConfig.FilterID2 = 0x25;
+
+  if ((status = HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig)) != HAL_OK) {
+    LOG(FAULT, "Can't configure FDCAN filter : HAL_status=%d.\r\n", status);
+  }
+
   if ((status = HAL_FDCAN_Start(&hfdcan1)) != HAL_OK) {
     LOG(FAULT, "Can't start FDCAN : HAL_status=%d.\r\n", status);
   }
+
   if ((status = HAL_FDCAN_ActivateNotification(
-           &hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0)) != HAL_OK) {
+           &hfdcan1,
+           FDCAN_IT_RX_FIFO0_NEW_MESSAGE | FDCAN_IT_RX_FIFO1_NEW_MESSAGE, 0)) !=
+      HAL_OK) {
     LOG(FAULT, "Can't activate notifications for FDCAN : HAL_status=%d.\r\n",
         status);
   }
@@ -161,6 +191,8 @@ int main(void) {
   /* USER CODE BEGIN WHILE */
 
   LOG(INFO, "Hello I am the battery board !");
+
+  srand(time(NULL));
   while (1) {
     /* USER CODE END WHILE */
 
@@ -169,15 +201,19 @@ int main(void) {
     GPIO_PinState pinState;
     if ((pinState = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) == GPIO_PIN_SET) {
       LOG(INFO, "User button has been pressed let's send a CAN message !");
-      float temperature = 49.61f;
-      float voltage = 15.83f;
-      float intensity = 128.52f;
-      uint8_t TxData[12];
-      TxData[0] = temperature;
-      TxData[4] = intensity;
-      TxData[8] = voltage;
+      float intensity = random_float(0.0, 300.0);
+      float temperature = random_float(0.0, 300.0);
+      float voltage = random_float(0.0, 300.0);
 
-      // SendCANMessage(TxData, BATTERY_STATUS);
+      uint8_t TxData[8];
+      if (rand() % 2) {
+        memcpy(&TxData[0], &intensity, sizeof(float));
+        memcpy(&TxData[4], &voltage, sizeof(float));
+        SendCANMessage(TxData, BATTERY_STATUS);
+      } else {
+        memcpy(&TxData[0], &temperature, sizeof(float));
+        SendCANMessage(TxData, TEMPERATURE_STATUS);
+      }
     }
 
     HAL_Delay(200);
@@ -206,25 +242,22 @@ void SystemClock_Config(void) {
 
   /** Initializes the CPU, AHB and APB buses clocks
    */
-  RCC_OscInitStruct.OscillatorType =
-      RCC_OSCILLATORTYPE_HSI48 | RCC_OSCILLATORTYPE_HSI |
-      RCC_OSCILLATORTYPE_LSE | RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48 |
+                                     RCC_OSCILLATORTYPE_HSI |
+                                     RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON_RTC_ONLY;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
-  RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_4;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLMBOOST = RCC_PLLMBOOST_DIV1;
   RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 80;
+  RCC_OscInitStruct.PLL.PLLN = 10;
   RCC_OscInitStruct.PLL.PLLP = 2;
   RCC_OscInitStruct.PLL.PLLQ = 2;
-  RCC_OscInitStruct.PLL.PLLR = 2;
-  RCC_OscInitStruct.PLL.PLLRGE = RCC_PLLVCIRANGE_0;
+  RCC_OscInitStruct.PLL.PLLR = 1;
+  RCC_OscInitStruct.PLL.PLLRGE = RCC_PLLVCIRANGE_1;
   RCC_OscInitStruct.PLL.PLLFRACN = 0;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
     Error_Handler();
@@ -331,15 +364,15 @@ static void MX_FDCAN1_Init(void) {
   /* USER CODE END FDCAN1_Init 1 */
   hfdcan1.Instance = FDCAN1;
   hfdcan1.Init.ClockDivider = FDCAN_CLOCK_DIV1;
-  hfdcan1.Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
+  hfdcan1.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
   hfdcan1.Init.Mode = FDCAN_MODE_NORMAL;
-  hfdcan1.Init.AutoRetransmission = DISABLE;
+  hfdcan1.Init.AutoRetransmission = ENABLE;
   hfdcan1.Init.TransmitPause = DISABLE;
   hfdcan1.Init.ProtocolException = DISABLE;
-  hfdcan1.Init.NominalPrescaler = 20;
-  hfdcan1.Init.NominalSyncJumpWidth = 1;
-  hfdcan1.Init.NominalTimeSeg1 = 12;
-  hfdcan1.Init.NominalTimeSeg2 = 3;
+  hfdcan1.Init.NominalPrescaler = 1;
+  hfdcan1.Init.NominalSyncJumpWidth = 21;
+  hfdcan1.Init.NominalTimeSeg1 = 138;
+  hfdcan1.Init.NominalTimeSeg2 = 21;
   hfdcan1.Init.DataPrescaler = 1;
   hfdcan1.Init.DataSyncJumpWidth = 1;
   hfdcan1.Init.DataTimeSeg1 = 1;
