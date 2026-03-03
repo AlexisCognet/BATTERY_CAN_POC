@@ -191,6 +191,9 @@ int main(void) {
   /* USER CODE BEGIN WHILE */
 
   LOG(INFO, "Hello I am the battery board !");
+  LOG(WARN, "This is a test log with level WARN.");
+  LOG(FAULT, "This is a test log with level FAULT.");
+  LOG(DEBUG, "This is a test log with level DEBUG.");
 
   srand(time(NULL));
   while (1) {
@@ -200,7 +203,7 @@ int main(void) {
 
     GPIO_PinState pinState;
     if ((pinState = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)) == GPIO_PIN_SET) {
-      LOG(INFO, "User button has been pressed let's send a CAN message !");
+      LOG(DEBUG, "User button has been pressed.");
       float intensity = random_float(0.0, 300.0);
       float temperature = random_float(0.0, 300.0);
       float voltage = random_float(0.0, 300.0);

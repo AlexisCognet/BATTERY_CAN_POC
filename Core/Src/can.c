@@ -54,13 +54,14 @@ bool SendCANMessage(uint8_t TxData[8], enum MESSAGE_TYPE type) {
       memcpy(&voltage, &TxData[4], sizeof(float));
       memcpy(&intensity, &TxData[0], sizeof(float));
       LOG(INFO,
-          "Sent CAN message, type=BATTERY_STATUS, Voltage=%.2fV | "
+          "Sent CAN message, type=BATTERY_STATUS | Voltage=%.2fV | "
           "Intensity=%.2fA",
           voltage, intensity);
     } else if (type == TEMPERATURE_STATUS) {
       float temperature;
       memcpy(&temperature, &TxData[0], sizeof(float));
-      LOG(INFO, "Sent CAN message, type=TEMPERATURE_STATUS, Temperature=%.2f°C",
+      LOG(INFO,
+          "Sent CAN message, type=TEMPERATURE_STATUS | Temperature=%.2f°C",
           temperature);
     }
   }
@@ -83,7 +84,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan,
           "HAL_status=%d.",
           status);
     } else {
-      LOG(INFO, "(FIFO0) Received CAN message of Id=%x with code=%d.\r\n",
+      LOG(INFO, "Received CAN message : Id=0x%x | code=%d.\r\n",
           RxHeader.Identifier, RxData[0]);
     }
   }
